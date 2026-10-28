@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Launch Plan — AI Document Chat (RAG)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: rgba(15, 23, 42, 0.10);
+    --text: #0f172a;
+    --muted: #475569;
+    --caption: #64748b;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --radius: 8px;
+    --radius-sm: 4px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --shadow: 0 1px 2px rgba(15,23,42,0.06), 0 4px 12px rgba(15,23,42,0.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  @page { size: A4; margin: 8mm; }
+  @media print {
+    body { background: #fff; font-size: 10.5px; }
+    .page { box-shadow: none; margin: 0; max-width: none; }
+    .no-print { display: none; }
+  }
+  .page {
+    max-width: 190mm;
+    margin: 8px auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10mm 12mm;
+  }
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: var(--space-3);
+  }
+  .title-block h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .title-block .sub {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .meta {
+    text-align: right;
+    font-size: 10px;
+    color: var(--caption);
+    line-height: 1.4;
+  }
+  .meta strong { color: var(--text); font-weight: 600; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--space-2);
+  }
+  section { margin-bottom: var(--space-3); }
+  section:last-child { margin-bottom: 0; }
+  h2 {
+    margin: 0 0 var(--space-2);
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  h3 {
+    margin: 0 0 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  p { margin: 0 0 var(--space-2); color: var(--text); }
+  ul { margin: 0; padding-left: 14px; }
+  li { margin-bottom: 2px; }
+  li:last-child { margin-bottom: 0; }
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+  }
+  .card h3 { margin-bottom: var(--space-1); }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2);
+  }
+  .kpi {
+    background: var(--accent-soft);
+    border: 1px solid rgba(37,99,235,0.15);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    text-align: center;
+  }
+  .kpi .value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .kpi .label {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  th, td {
+    text-align: left;
+    padding: 3px 6px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    color: var(--caption);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 9px;
+    background: var(--bg);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .risk { color: var(--danger); font-weight: 600; }
+  .muted { color: var(--muted); }
+  footer {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
+    font-size: 9px;
+    color: var(--caption);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title-block">
+        <h1>Launch Plan — AI Document Chat (RAG)</h1>
+        <p class="sub">One-page plan · v1 public launch · November 2026</p>
+      </div>
+      <div class="meta">
+        <div><strong>Owner:</strong> Maya (Scrum Master)</div>
+        <div><strong>Launch:</strong> Mon 16 Nov 2026</div>
+        <div><strong>Status:</strong> <span class="tag">Draft</span></div>
+      </div>
+    </header>
+
+    <section>
+      <h2>Objective</h2>
+      <p>Ship v1 of <strong>AI Document Chat</strong> to early users and convert the waitlist into active usage. Success = <strong>500 signups</strong>, <strong>50 weekly active users</strong>, and a sub-2s median answer latency within 30 days of launch.</p>
+    </section>
+
+    <div class="grid">
+      <section>
+        <h2>Audience</h2>
+        <ul>
+          <li>Knowledge workers drowning in PDFs/contracts/reports</li>
+          <li>Researchers &amp; students reading long papers</li>
+          <li>Small teams sharing document sets (legal, ops, finance)</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Key message</h2>
+        <p class="muted">"Chat with your documents in seconds. Upload a PDF, DOCX, TXT or Markdown file, ask a question, get a cited answer. No setup — runs in your browser."</p>
+      </section>
+    </div>
+
+    <section>
+      <h2>Channels</h2>
+      <div class="grid-3">
+        <div class="card"><h3>Owned</h3><p class="muted">Waitlist email (2 sends), in-app banner, blog post, docs site.</p></div>
+        <div class="card"><h3>Earned</h3><p class="muted">Product Hunt, Hacker News, LinkedIn, X/Twitter, creator outreach.</p></div>
+        <div class="card"><h3>Community</h3><p class="muted">Reddit (r/productivity, r/ChatGPT), Discord/Slack groups, university clubs.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Timeline (November 2026)</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Milestone</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td>Mon 2 Nov</td><td>Feature freeze; v1 candidate build</td><td>Eng lead</td></tr>
+          <tr><td>Wed 4 Nov</td><td>QA pass + security review (upload limits, CORS, no PII leaks)</td><td>QA / Sec</td></tr>
+          <tr><td>Fri 6 Nov</td><td>Landing page, docs &amp; changelog live</td><td>Marketing</td></tr>
+          <tr><td>Mon 9 Nov</td><td>Waitlist email #1 — teaser + early-access link</td><td>Marketing</td></tr>
+          <tr><td>Thu 12 Nov</td><td>Press &amp; creator outreach (10 targets)</td><td>Marketing</td></tr>
+          <tr><td>Mon 16 Nov</td><td><strong>Launch day</strong> — Product Hunt + social blitz</td><td>All</td></tr>
+          <tr><td>Wed 18 Nov</td><td>Waitlist email #2 — "we're live"</td><td>Marketing</td></tr>
+          <tr><td>Fri 20 Nov</td><td>Retro + metrics review; v1.1 triage</td><td>Maya</td></tr>
+          <tr><td>Mon 30 Nov</td><td>Sprint grooming for v1.1</td><td>Maya</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Success metrics (30 days post-launch)</h2>
+      <div class="kpi-row">
+        <div class="kpi"><div class="value">500</div><div class="label">Signups</div></div>
+        <div class="kpi"><div class="value">50</div><div class="label">Weekly active</div></div>
+        <div class="kpi"><div class="value">&lt;2s</div><div class="label">Median latency</div></div>
+        <div class="kpi"><div class="value">&ge;30</div><div class="label">NPS</div></div>
+      </div>
+      <p class="muted" style="margin-top:6px;">Also track: error rate &lt;1%, docs uploaded per user ≥2, day-7 retention ≥25%.</p>
+    </section>
+
+    <div class="grid">
+      <section>
+        <h2>Risks &amp; mitigations</h2>
+        <ul>
+          <li><span class="risk">LLM cost overrun</span> — default to extractive fallback; rate-limit per session; monitor spend daily.</li>
+          <li><span class="risk">Low retention</span> — onboarding tour + sample docs; empty-state prompts.</li>
+          <li><span class="risk">Support load</span> — FAQ, in-app help, office hours in week 1.</li>
+          <li><span class="risk">Privacy concerns</span> — state "processed in memory, nothing persisted" prominently.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Dependencies</h2>
+        <ul>
+          <li>Landing page copy &amp; assets (Marketing)</li>
+          <li>Domain + analytics (Eng / Ops)</li>
+          <li>Product Hunt listing assets (Marketing)</li>
+          <li>Support inbox &amp; FAQ (Support)</li>
+        </ul>
+      </section>
+    </div>
+
+    <footer>
+      <span>AI Document Chat (RAG) · Launch Plan v1 · Draft</span>
+      <span>Prepared by Maya, Scrum Master · 28 Oct 2026</span>
+    </footer>
+  </div>
+</body>
+</html>
